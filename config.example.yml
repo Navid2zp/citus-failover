@@ -1,0 +1,17 @@
+Monitor:
+  Host: localhost
+  Port: 5432
+  User: autoctl_node
+  Password: 123456
+  DBName: pg_auto_failover
+Settings:
+  CheckInterval: 500
+  CoordinatorFormation: default
+  WorkersFormations:
+    - worker-1
+    - worker-2
+    - worker-3
+API:
+  Enabled: true
+  Port: 3002
+  Secret: SECRET_STRING
