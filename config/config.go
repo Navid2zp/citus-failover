@@ -17,11 +17,14 @@ type ServiceConfig struct {
 		Password string
 		DBName   string
 	}
+	Coordinator struct {
+		Formation string
+		Username  string
+		Password  string
+		DBName string
+	}
 	Settings struct {
-		CheckInterval        int
-		CoordinatorFormation string
-		WorkersFormations    []string
-		AdminSecret          string
+		CheckInterval     int
 	}
 	API struct {
 		Enabled bool

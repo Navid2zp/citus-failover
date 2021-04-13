@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/Navid2zp/citus-failover/config"
+	"github.com/Navid2zp/citus-failover/core"
 )
 
 func main() {
@@ -12,4 +13,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	core.InitMonitor()
+	core.Monitor()
 }
