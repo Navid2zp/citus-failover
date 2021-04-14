@@ -11,6 +11,7 @@ Coordinator:
   DBName: postgres
 Settings:
   CheckInterval: 2000
+  Debug: false
 API:
   Enabled: true
   Port: 3002

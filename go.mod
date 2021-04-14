@@ -3,6 +3,7 @@ module github.com/Navid2zp/citus-failover
 go 1.16
 
 require (
+	github.com/gin-gonic/gin v1.7.1 // indirect
 	github.com/jmoiron/sqlx v1.3.3 // indirect
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/spf13/viper v1.7.1 // indirect

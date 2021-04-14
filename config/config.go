@@ -21,14 +21,15 @@ type ServiceConfig struct {
 		Formation string
 		Username  string
 		Password  string
-		DBName string
+		DBName    string
 	}
 	Settings struct {
-		CheckInterval     int
+		CheckInterval int
+		Debug         bool
 	}
 	API struct {
 		Enabled bool
-		Port    int
+		Port    string
 		Secret  string
 	}
 }
