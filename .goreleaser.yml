@@ -1,0 +1,32 @@
+builds:
+  # You can have multiple builds defined as a yaml list
+  -
+    # GOOS list to build for.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    # Defaults are darwin and linux.
+    goos:
+      - darwin
+      - linux
+
+    # GOARCH to build for.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    # Defaults are 386, amd64 and arm64.
+    goarch:
+      - amd64
+      - arm64
+      - 386
+dockers:
+  # You can have multiple Docker images.
+  -
+    # GOOS of the built binaries/packages that should be used.
+    goos: linux
+
+    # GOARCH of the built binaries/packages that should be used.
+    goarch: amd64
+
+    # Templates of the Docker image names.
+    image_templates:
+    - "docker.pkg.github.com/navid2zp/citus-failover/citus-failover:latest"
+    # Path to the Dockerfile (from the project root).
+    dockerfile: Dockerfile
+
