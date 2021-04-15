@@ -47,7 +47,7 @@ Available endpoints:
 
 `/v1/nodes`: List of all the nodes in your monitor.
 
-`/v1/coordinator: Primary coordinator address.
+`/v1/coordinator`: Primary coordinator address.
 
 `/v1/coordinators`: List of all available coordinator nodes.
 
