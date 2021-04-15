@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 
-WORKDIR ~
+WORKDIR /
 
 COPY citus-failover .
 
-CMD ["./citus-failover", "-f", "config/config.yml"]
+CMD ["./citus-failover", "-f", "/config/config.yml"]

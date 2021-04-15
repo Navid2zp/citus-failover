@@ -117,5 +117,7 @@ modules.xml
 logs/*
 
 main.exe
+citus-failover
+citus-failover.exe
 
 config.yml
