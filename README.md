@@ -51,7 +51,7 @@ Available endpoints:
 
 `/v1/coordinators`: List of all available coordinator nodes.
 
-`v/1/workers/`: List of primary worker nodes.
+`v/1/workers`: List of primary worker nodes.
 
 
 [1]: https://github.com/citusdata/pg_auto_failover
