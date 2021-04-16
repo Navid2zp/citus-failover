@@ -27,6 +27,13 @@ dockers:
     # Templates of the Docker image names.
     image_templates:
     - "docker.pkg.github.com/navid2zp/citus-failover/citus-failover:latest"
+    - "docker.pkg.github.com/navid2zp/citus-failover/citus-failover:{{ .Tag }}"
+    - "docker.pkg.github.com/navid2zp/citus-failover/citus-failover:v{{ .Major }}"
+    - "docker.pkg.github.com/navid2zp/citus-failover/citus-failover:v{{ .Major }}.{{ .Minor }}"
+    - "navid2zp/citus-failover:latest"
+    - "navid2zp/citus-failover:{{ .Tag }}"
+    - "navid2zp/citus-failover:v{{ .Major }}"
+    - "navid2zp/citus-failover:v{{ .Major }}.{{ .Minor }}"
     # Path to the Dockerfile (from the project root).
     dockerfile: Dockerfile
 
