@@ -15,23 +15,25 @@ func (l *Logger) NoCoordinatorFound() {
 		zap.String("service", l.service))
 }
 
-func (l *Logger) CoordinatorChanged(oldHost, newHost string, oldPort, newPort int) {
+func (l *Logger) CoordinatorChanged(oldHost, newHost, dbname string, oldPort, newPort int) {
 	l.l.Info("coordinator changed, connecting to new coordinator.",
-		zap.String("service", l.service),
+		zap.String("service", l.service), zap.String("dbname", dbname),
 		zap.String("old-coordinator", fmt.Sprintf("%s:%d", oldHost, oldPort)),
 		zap.String("new-coordinator", fmt.Sprintf("%s:%d", newHost, newPort)))
 }
 
-func (l *Logger) CoordinatorConnectionLost(host string, port int) {
+func (l *Logger) CoordinatorConnectionLost(host, dbname, dbUsername string, port int) {
 	l.l.Warn("coordinator connection lost, reconnecting ...",
 		zap.String("service", l.service),
-		zap.String("host", host), zap.Int("port", port))
+		zap.String("host", host), zap.String("database", dbname), zap.String("username", dbUsername),
+		zap.Int("port", port))
 }
 
-func (l *Logger) CoordinatorConnectionFailed(host string, port int, err error) {
+func (l *Logger) CoordinatorConnectionFailed(host, dbname, dbUsername string, port int, err error) {
 	l.l.Error("connecting to coordinator failed!",
 		zap.String("service", l.service),
-		zap.String("host", host), zap.Int("port", port), zap.Error(err))
+		zap.String("host", host), zap.String("database", dbname), zap.String("username", dbUsername),
+		zap.Int("port", port), zap.Error(err))
 }
 
 func (l *Logger) GetCoordinatorFailed(err error) {
@@ -39,42 +41,43 @@ func (l *Logger) GetCoordinatorFailed(err error) {
 		zap.String("service", l.service), zap.Error(err))
 }
 
-func (l *Logger) GetWorkersFailed(err error) {
+func (l *Logger) GetWorkersFailed(err error, dbname string) {
 	if err == sql.ErrNoRows {
-		l.NoWorkersFound()
+		l.NoWorkersFound(dbname)
 		return
 	}
 	l.l.Error("failed to get workers!",
-		zap.String("service", l.service), zap.Error(err))
+		zap.String("service", l.service), zap.String("dbname", dbname), zap.Error(err))
 }
 
-func (l *Logger) WorkerPrimaryCheckFailed(err error, workerID int) {
+func (l *Logger) WorkerPrimaryCheckFailed(err error, workerID int, dbname string) {
 	l.l.Error("failed to check if worker is primary!",
-		zap.String("service", l.service), zap.Error(err), zap.Int("worker-id", workerID))
+		zap.String("service", l.service), zap.String("database", dbname),
+		zap.Error(err), zap.Int("worker-id", workerID))
 }
 
-func (l *Logger) WorkerStateChange(oldHost, newHost string, oldPort, newPort int) {
+func (l *Logger) WorkerStateChange(oldHost, newHost, dbname string, oldPort, newPort int) {
 	oldWorker := fmt.Sprintf("%s:%d", oldHost, oldPort)
 	newWorker := fmt.Sprintf("%s:%d", newHost, newPort)
 	l.l.Info("worker change detected, updating coordinator ...",
-		zap.String("service", l.service),
+		zap.String("service", l.service), zap.String("database", dbname),
 		zap.String("old-worker", oldWorker), zap.String("new-worker", newWorker))
 }
 
-func (l *Logger) WorkerUpdated(oldHost, newHost string, oldPort, newPort int) {
+func (l *Logger) WorkerUpdated(oldHost, newHost, dbname string, oldPort, newPort int) {
 	oldWorker := fmt.Sprintf("%s:%d", oldHost, oldPort)
 	newWorker := fmt.Sprintf("%s:%d", newHost, newPort)
 	l.l.Info("worker updated",
-		zap.String("service", l.service),
+		zap.String("service", l.service), zap.String("database", dbname),
 		zap.String("old-worker", oldWorker), zap.String("new-worker", newWorker))
 }
 
-func (l *Logger) WorkerUpdateFailed(err error) {
+func (l *Logger) WorkerUpdateFailed(err error, dbname string) {
 	l.l.Error("failed to update worker in coordinator",
-		zap.String("service", l.service), zap.Error(err))
+		zap.String("service", l.service), zap.String("dbname", dbname), zap.Error(err))
 }
 
-func (l *Logger) NoWorkersFound() {
+func (l *Logger) NoWorkersFound(dbname string) {
 	l.l.Error("no workers found!",
-		zap.String("service", l.service))
+		zap.String("service", l.service), zap.String("dbname", dbname))
 }

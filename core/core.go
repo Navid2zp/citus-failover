@@ -2,9 +2,11 @@ package core
 
 import (
 	"database/sql"
-	"github.com/Navid2zp/citus-failover/config"
+	"errors"
 	"time"
 )
+
+var ErrDBNotFound = errors.New("no such database found")
 
 type Node struct {
 	FormationID         string    `db:"formationid" json:"formation_id"`
@@ -57,10 +59,45 @@ func GetNodes() ([]*Node, error) {
 	return nodes, err
 }
 
-func GetPrimaryWorkers() ([]*Worker, error) {
+func GetPrimaryCoordinator(dbname string) (*Coordinator, error) {
+	var db *database
+	if db = findDatabase(dbname); db == nil {
+		return nil, ErrDBNotFound
+	}
+	return db.getCoordinator()
+}
+
+func GetPrimaryWorkers(dbname string) ([]*Worker, error) {
+	var db *database
 	var workers []*Worker
-	err := currentCoordinator.db.Select(&workers, `SELECT * from pg_dist_node where noderole = 'primary';`)
+	if db = findDatabase(dbname); db == nil {
+		return workers, nil
+	}
+	return db.getPrimaryWorkers()
+}
+
+func GetCoordinators(dbname string) ([]*Node, error) {
+	var coordinators []*Node
+	var db *database
+	if db = findDatabase(dbname); db == nil {
+		return coordinators, nil
+	}
+	err := monitorDB.Select(&coordinators,
+		`select * from pgautofailover.node where formationid = $1;`, db.formation)
+	return coordinators, err
+}
+
+func (d *database) getPrimaryWorkers() ([]*Worker, error) {
+	var workers []*Worker
+	err := d.db.Select(&workers, `SELECT * from pg_dist_node where noderole = 'primary';`)
 	return workers, err
+}
+
+func (d *database) getCoordinator() (*Coordinator, error) {
+	var node Coordinator
+	err := monitorDB.Get(&node,
+		`select * from pgautofailover.get_primary($1);`, d.formation)
+	return &node, err
 }
 
 func (w *Worker) isPrimary() (bool, *Node, error) {
@@ -77,37 +114,30 @@ func (w *Worker) isPrimary() (bool, *Node, error) {
 	return false, &newNode, err
 }
 
-func (w *Worker) updateCoordinator(newHost string, newPort int) error {
-	_, err := currentCoordinator.db.Exec(`select * from citus_update_node($1, $2, $3);`, w.ID, newHost, newPort)
+func (w *Worker) updateCoordinator(newHost string, newPort int, db *database) error {
+	_, err := db.db.Exec(`select * from citus_update_node($1, $2, $3);`, w.ID, newHost, newPort)
 	return err
 }
 
-func GetAllCoordinators() ([]*Node, error) {
-	var coordinators []*Node
-	err := monitorDB.Select(&coordinators,
-		`select * from pgautofailover.node where formationid = $1;`, config.Config.Coordinator.Formation)
-	return coordinators, err
-}
-
-func GetCoordinator() (*Coordinator, error) {
-	var node Coordinator
-	err := monitorDB.Get(&node,
-		`select * from pgautofailover.get_primary($1);`, config.Config.Coordinator.Formation)
-	return &node, err
-}
-
-func (c *Coordinator) connect() error {
-
-	if currentCoordinator.db == nil {
-		return openCoordinatorConnection(c.Host, c.Port)
+func (d *database) connect(coordinatorNode *Coordinator) error {
+	var err error
+	if d.db == nil {
+		d.host = coordinatorNode.Host
+		d.port = coordinatorNode.Port
+		d.db, err = openDBConnection(d.host, d.username, d.dbname, d.password, d.port)
+		return err
 	}
-	if c.Host != currentCoordinator.host || c.Port != currentCoordinator.port {
-		logger.CoordinatorChanged(currentCoordinator.host, c.Host, currentCoordinator.port, c.Port)
-		return openCoordinatorConnection(c.Host, c.Port)
+	if d.host != coordinatorNode.Host || d.port != coordinatorNode.Port {
+		logger.CoordinatorChanged(coordinatorNode.Host, d.host, d.dbname, coordinatorNode.Port, d.port)
+		d.host = coordinatorNode.Host
+		d.port = coordinatorNode.Port
+		d.db, err = openDBConnection(d.host, d.username, d.dbname, d.password, d.port)
+		return err
 	}
-	if currentCoordinator.db.Ping() != nil {
-		logger.CoordinatorConnectionLost(c.Host, c.Port)
-		return openCoordinatorConnection(c.Host, c.Port)
+	if d.db.Ping() != nil {
+		logger.CoordinatorConnectionLost(d.host, d.dbname, d.username, d.port)
+		d.db, err = openDBConnection(d.host, d.username, d.dbname, d.password, d.port)
+		return err
 	}
 	return nil
 }

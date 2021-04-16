@@ -4,11 +4,11 @@ Monitor:
   User: autoctl_node
   Password: 123456
   DBName: pg_auto_failover
-Coordinator:
-  Formation: default
-  Password: 654321
-  Username: postgres
-  DBName: postgres
+Coordinators:
+  - DBName: postgres
+    Password: 654321
+    Username: postgres
+    Formation: default
 Settings:
   CheckInterval: 2000
   Debug: false

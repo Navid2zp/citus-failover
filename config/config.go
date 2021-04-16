@@ -17,7 +17,7 @@ type ServiceConfig struct {
 		Password string
 		DBName   string
 	}
-	Coordinator struct {
+	Coordinators []struct {
 		Formation string
 		Username  string
 		Password  string

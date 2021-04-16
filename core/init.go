@@ -3,66 +3,19 @@ package core
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
-	"github.com/Navid2zp/citus-failover/config"
 	"github.com/Navid2zp/citus-failover/logging"
-	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"time"
 )
 
-var monitorDB *sqlx.DB
+
 var logger *logging.Logger
-var currentCoordinator struct {
-	host string
-	port int
-	db   *sqlx.DB
-}
 
-func openMonitoringConnection() {
-	var err error
-
-	monitorDB, err = sqlx.Connect(
-		"postgres",
-		fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-			config.Config.Monitor.Host,
-			config.Config.Monitor.Port,
-			config.Config.Monitor.User,
-			config.Config.Monitor.Password,
-			config.Config.Monitor.DBName,
-		),
-	)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func openCoordinatorConnection(host string, port int) error {
-	var err error
-	currentCoordinator.host = ""
-	currentCoordinator.port = 0
-	currentCoordinator.db, err = sqlx.Connect(
-		"postgres",
-		fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-			host,
-			port,
-			config.Config.Coordinator.Username,
-			config.Config.Coordinator.Password,
-			config.Config.Coordinator.DBName,
-		),
-	)
-	if err == nil {
-		currentCoordinator.host = host
-		currentCoordinator.port = port
-	}
-	return err
-}
 
 func InitMonitor() {
 	openMonitoringConnection()
+	setupDatabases()
 	logger = logging.NewLogger("core")
 }
 
