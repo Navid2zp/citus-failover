@@ -10,6 +10,7 @@ import (
 
 var logger *logging.Logger
 
+// initAPI initiates the configuration for api service.
 func initAPI() {
 	logger = logging.NewLogger("api")
 	if !config.Config.Settings.Debug {
@@ -17,6 +18,7 @@ func initAPI() {
 	}
 }
 
+// adminMiddleware checks the request headers for secret key provided in config file.
 func adminMiddleware(c *gin.Context) {
 	secret := c.Request.Header.Get("Secret")
 	if secret == "" {
@@ -30,6 +32,7 @@ func adminMiddleware(c *gin.Context) {
 	c.Next()
 }
 
+// Serve serves the API.
 func Serve() {
 	initAPI()
 

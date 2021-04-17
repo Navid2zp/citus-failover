@@ -8,6 +8,7 @@ import (
 
 var ErrDBNotFound = errors.New("no such database found")
 
+// Node represents a node in monitoring service.
 type Node struct {
 	FormationID         string    `db:"formationid" json:"formation_id"`
 	ID                  int       `db:"nodeid" json:"id"`
@@ -32,6 +33,7 @@ type Node struct {
 	IsCoordinator       bool      `db:"-" json:"-"`
 }
 
+// Worker represents a worker in coordinators.
 type Worker struct {
 	ID               int      `db:"nodeid" json:"id"`
 	GroupID          int      `db:"groupid" json:"group_id"`
@@ -46,6 +48,7 @@ type Worker struct {
 	ShouldHaveShards bool     `db:"shouldhaveshards" json:"should_have_shards"`
 }
 
+// Coordinator represents a coordinator database
 type Coordinator struct {
 	PrimaryNodeID int    `db:"primary_node_id" json:"primary_node_id"`
 	Name          string `db:"primary_name" json:"name"`
@@ -53,12 +56,14 @@ type Coordinator struct {
 	Port          int    `db:"primary_port" json:"port"`
 }
 
+// GetNodes returns all the node monitored in the monitor.
 func GetNodes() ([]*Node, error) {
 	var nodes []*Node
 	err := monitorDB.Select(&nodes, `select * from pgautofailover.node`)
 	return nodes, err
 }
 
+// GetPrimaryCoordinator returns the primary coordinator info given the database name.
 func GetPrimaryCoordinator(dbname string) (*Coordinator, error) {
 	var db *database
 	if db = findDatabase(dbname); db == nil {
@@ -67,6 +72,7 @@ func GetPrimaryCoordinator(dbname string) (*Coordinator, error) {
 	return db.getCoordinator()
 }
 
+// GetPrimaryWorkers returns all the workers available in a database.
 func GetPrimaryWorkers(dbname string) ([]*Worker, error) {
 	var db *database
 	var workers []*Worker
@@ -76,6 +82,7 @@ func GetPrimaryWorkers(dbname string) ([]*Worker, error) {
 	return db.getPrimaryWorkers()
 }
 
+// GetCoordinators returns a list of all the primary and non-primary coordinator nodes.
 func GetCoordinators(dbname string) ([]*Node, error) {
 	var coordinators []*Node
 	var db *database
@@ -87,12 +94,14 @@ func GetCoordinators(dbname string) ([]*Node, error) {
 	return coordinators, err
 }
 
+// getPrimaryWorkers returns all the primary workers for a database.
 func (d *database) getPrimaryWorkers() ([]*Worker, error) {
 	var workers []*Worker
 	err := d.db.Select(&workers, `SELECT * from pg_dist_node where noderole = 'primary';`)
 	return workers, err
 }
 
+// getCoordinator returns the coordinator for the database.
 func (d *database) getCoordinator() (*Coordinator, error) {
 	var node Coordinator
 	err := monitorDB.Get(&node,
@@ -100,6 +109,7 @@ func (d *database) getCoordinator() (*Coordinator, error) {
 	return &node, err
 }
 
+// isPrimary checks if the worker is a primary node in the monitor.
 func (w *Worker) isPrimary() (bool, *Node, error) {
 	var newNode Node
 	err := monitorDB.Get(&newNode, `select * from pgautofailover.node
@@ -114,11 +124,15 @@ func (w *Worker) isPrimary() (bool, *Node, error) {
 	return false, &newNode, err
 }
 
-func (w *Worker) updateCoordinator(newHost string, newPort int, db *database) error {
+// updateWorkerInCoordinator updates a worker node in the database.
+func (w *Worker) updateWorkerInCoordinator(newHost string, newPort int, db *database) error {
 	_, err := db.db.Exec(`select * from citus_update_node($1, $2, $3);`, w.ID, newHost, newPort)
 	return err
 }
 
+// connect connects to the database
+// checks the coordinator state and the previous connections
+// establishes a new one if connection is lost primary node changed
 func (d *database) connect(coordinatorNode *Coordinator) error {
 	var err error
 	if d.db == nil {

@@ -6,13 +6,13 @@ import (
 	"github.com/Navid2zp/citus-failover/logging"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
-	"time"
 )
 
 
 var logger *logging.Logger
 
 
+// InitMonitor initializes the configurations for monitoring databases.
 func InitMonitor() {
 	openMonitoringConnection()
 	setupDatabases()
@@ -34,30 +34,6 @@ func (ni NullInt64) MarshalJSON() ([]byte, error) {
 
 func (ni *NullInt64) ToInt64() int64 {
 	return ni.Int64
-}
-
-func Int64ToNullInt64(i int64) NullInt64 {
-	if i == 0 {
-		return NullInt64{}
-	}
-	return NullInt64{
-		sql.NullInt64{
-			Int64: i,
-			Valid: true,
-		},
-	}
-}
-
-func TimeToNullTime(t time.Time, null bool) NullTime {
-	if null {
-		return NullTime{}
-	}
-	return NullTime{
-		pq.NullTime{
-			Time:  t,
-			Valid: true,
-		},
-	}
 }
 
 // UnmarshalJSON for NullInt64
@@ -129,30 +105,6 @@ func (ns *NullString) UnmarshalJSON(b []byte) error {
 
 func (ns *NullString) ToString() string {
 	return ns.String
-}
-
-func StringToNullString(s string) NullString {
-	if s == "" {
-		return NullString{}
-	}
-	return NullString{
-		sql.NullString{
-			String: s,
-			Valid:  true,
-		},
-	}
-}
-
-func Float64ToNullFloat64(f float64) NullFloat64 {
-	if f == 0 {
-		return NullFloat64{}
-	}
-	return NullFloat64{
-		sql.NullFloat64{
-			Float64: f,
-			Valid:   true,
-		},
-	}
 }
 
 type NullTime struct {

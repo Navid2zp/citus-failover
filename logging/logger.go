@@ -9,6 +9,7 @@ type Logger struct {
 	l       *zap.Logger
 }
 
+// NewLogger creates and returns a new Logger pointer
 func NewLogger(service string) *Logger {
 	//zap.NewProductionConfig()
 	//cfg := zap.NewProductionConfig()

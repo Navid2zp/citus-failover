@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// validateWorker validates if the worker is primary
 func (d *database) validateWorker(worker *Worker) {
 	isPrimary, newNode, err := worker.isPrimary()
 	if err != nil {
@@ -14,7 +15,7 @@ func (d *database) validateWorker(worker *Worker) {
 	}
 	if !isPrimary {
 		logger.WorkerStateChange(worker.Host, newNode.Host, d.dbname, worker.Port, newNode.Port)
-		err = worker.updateCoordinator(newNode.Host, newNode.Port, d)
+		err = worker.updateWorkerInCoordinator(newNode.Host, newNode.Port, d)
 		if err != nil {
 			logger.WorkerUpdateFailed(err, d.dbname)
 			return
@@ -23,6 +24,7 @@ func (d *database) validateWorker(worker *Worker) {
 	}
 }
 
+// validateWorkers iterates over all the workers for a database and validates them.
 func (d *database) validateWorkers() {
 	workers, err := d.getPrimaryWorkers()
 	if err != nil {
@@ -34,6 +36,7 @@ func (d *database) validateWorkers() {
 	}
 }
 
+// monitor periodically monitors the database for non-primary nodes.
 func (d *database) monitor() {
 	for {
 		time.Sleep(time.Duration(config.Config.Settings.CheckInterval) * time.Millisecond)
@@ -57,6 +60,7 @@ func (d *database) monitor() {
 }
 
 
+// Monitor runs the monitoring for all databases.
 func Monitor() {
 
 	for _, db := range databases {

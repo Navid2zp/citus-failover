@@ -16,9 +16,12 @@ type database struct {
 	db        *sqlx.DB
 }
 
+// databases holds the list of all databases to be monitored
 var databases []*database
+// monitorDB is database instance for monitor
 var monitorDB *sqlx.DB
 
+// openMonitoringConnection opens a connection to monitor database
 func openMonitoringConnection() {
 	var err error
 
@@ -38,6 +41,7 @@ func openMonitoringConnection() {
 	}
 }
 
+// setupDatabases adds all the listed databases in the config file to databases.
 func setupDatabases() {
 	for _, db := range config.Config.Coordinators {
 		coordinator := database{
@@ -53,6 +57,7 @@ func setupDatabases() {
 	}
 }
 
+// openDBConnection opens a database connection.
 func openDBConnection(host, username, dbname, password string, port int) (*sqlx.DB, error) {
 	return sqlx.Connect(
 		"postgres",
@@ -67,6 +72,7 @@ func openDBConnection(host, username, dbname, password string, port int) (*sqlx.
 	)
 }
 
+// findDatabase finds a database in monitoring databases list given the database name.
 func findDatabase(dbname string) *database {
 	for _, db := range databases {
 		if db.dbname == dbname {

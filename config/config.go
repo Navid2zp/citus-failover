@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// ServiceConfig represents the config data for the application.
 type ServiceConfig struct {
 	Monitor struct {
 		Host     string
@@ -36,6 +37,7 @@ type ServiceConfig struct {
 
 var Config ServiceConfig
 
+// getConfigNameAndPath returns the path and name of the config file.
 func getConfigNameAndPath(configPath string) (string, string) {
 	path, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	name := "config"
@@ -50,6 +52,7 @@ func getConfigNameAndPath(configPath string) (string, string) {
 	return name, path
 }
 
+// InitConfig initializes the application config.
 func InitConfig(configPath string) (*ServiceConfig, error) {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
