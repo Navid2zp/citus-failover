@@ -97,7 +97,8 @@ func GetCoordinators(dbname string) ([]*Node, error) {
 // getPrimaryWorkers returns all the primary workers for a database.
 func (d *database) getPrimaryWorkers() ([]*Worker, error) {
 	var workers []*Worker
-	err := d.db.Select(&workers, `SELECT * from pg_dist_node where noderole = 'primary';`)
+	err := d.db.Select(&workers,
+		`SELECT * from pg_dist_node where noderole = 'primary' or noderole = 'wait_primary';`)
 	return workers, err
 }
 
