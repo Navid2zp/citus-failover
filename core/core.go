@@ -112,10 +112,15 @@ func (d *database) getCoordinator() (*Coordinator, error) {
 // isPrimary checks if the worker is a primary node in the monitor.
 func (w *Worker) isPrimary() (bool, *Node, error) {
 	var newNode Node
+	// goalstate will be `wait_primary` when there is no second node as backup
+	// or a node is not verified as secondary yet
+	// not including `wait_primary` causes the primary check to fail when there is only one healthy node
+	// https://pg-auto-failover.readthedocs.io/en/master/tutorial.html#cause-a-node-failure
+	// https://github.com/Navid2zp/citus-failover/issues/1
 	err := monitorDB.Get(&newNode, `select * from pgautofailover.node
 		where formationid = 
 		      (select formationid from pgautofailover.node where nodehost = $1 and nodeport = $2 limit 1)
-		  and goalstate = 'primary'
+		  and (goalstate = 'primary' or goalstate = 'wait_primary')
 		  and (nodehost != $1 or nodeport != $2) limit 1;`,
 		w.Host, w.Port)
 	if err == sql.ErrNoRows {
