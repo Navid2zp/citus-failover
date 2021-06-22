@@ -1,18 +1,34 @@
+# Connection details for your monitor service.
 Monitor:
   Host: localhost
   Port: 5432
   User: autoctl_node
   Password: 123456
   DBName: pg_auto_failover
+
+# A list of coordinator nodes that you want to be monitored for changes in their worker nodes.
 Coordinators:
   - DBName: postgres
     Password: 654321
     Username: postgres
+
+    # Formation that the node can be found with in monitor.
     Formation: default
+
+# Service settings
 Settings:
+  # Check interval for changes (in ms).
   CheckInterval: 2000
   Debug: false
+
+# REST API settings.
 API:
+  # Enables the REST API.
   Enabled: true
+
+  # The port that the API should be run at.
   Port: 3002
+
+  # The secret key that will be used to authorize requests.
+  # All requests require this string in their header as SECRET.
   Secret: SECRET_STRING
