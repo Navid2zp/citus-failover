@@ -1,3 +1,12 @@
+<p align="center">
+	<img alt="License" src="https://img.shields.io/github/license/navid2zp/citus-failover" />
+  <img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/navid2zp/citus-failover" />
+  <img alt="Build" src="https://img.shields.io/github/workflow/status/navid2zp/citus-failover/Go" />
+	<img alt="Docker size" src="https://img.shields.io/docker/image-size/navid2zp/citus-failover" />
+	<img alt="Docker version" src="https://img.shields.io/docker/v/navid2zp/citus-failover" />
+	<img alt="Docker pulls" src="https://img.shields.io/docker/pulls/navid2zp/citus-failover" />
+</p>
+
 # citus-failover
 Worker failover support for citus community version using pg_auto_failover.
 
