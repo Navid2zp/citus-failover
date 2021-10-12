@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+
 	"github.com/Navid2zp/citus-failover/config"
 	"github.com/jmoiron/sqlx"
 )
@@ -13,11 +14,13 @@ type database struct {
 	username  string
 	password  string
 	dbname    string
+	sslmode   string `default:"disable"`
 	db        *sqlx.DB
 }
 
 // databases holds the list of all databases to be monitored
 var databases []*database
+
 // monitorDB is database instance for monitor
 var monitorDB *sqlx.DB
 
@@ -28,12 +31,13 @@ func openMonitoringConnection() {
 	monitorDB, err = sqlx.Connect(
 		"postgres",
 		fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+			"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 			config.Config.Monitor.Host,
 			config.Config.Monitor.Port,
 			config.Config.Monitor.User,
 			config.Config.Monitor.Password,
 			config.Config.Monitor.DBName,
+			config.Config.Monitor.SSLMode,
 		),
 	)
 	if err != nil {
@@ -51,6 +55,7 @@ func setupDatabases() {
 			username:  db.Username,
 			password:  db.Password,
 			dbname:    db.DBName,
+			sslmode:   db.SSLMode,
 			db:        nil,
 		}
 		databases = append(databases, &coordinator)
@@ -58,16 +63,17 @@ func setupDatabases() {
 }
 
 // openDBConnection opens a database connection.
-func openDBConnection(host, username, dbname, password string, port int) (*sqlx.DB, error) {
+func openDBConnection(host, username, dbname, password string, port int, sslmode string) (*sqlx.DB, error) {
 	return sqlx.Connect(
 		"postgres",
 		fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+			"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 			host,
 			port,
 			username,
 			password,
 			dbname,
+			sslmode,
 		),
 	)
 }
