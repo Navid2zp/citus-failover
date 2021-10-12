@@ -22,6 +22,7 @@ type Node struct {
 	ReportedPGIsRunning bool      `db:"reportedpgisrunning" json:"reported_pg_is_running"`
 	ReportedRepState    string    `db:"reportedrepstate" json:"reported_rep_state"`
 	ReportTime          time.Time `db:"reporttime" json:"report_time"`
+	ReportedTLI         int       `db:"reportedtli" json:"reported_tli"`
 	ReportedLSN         string    `db:"reportedlsn" json:"reported_lsn"`
 	WALReportTime       time.Time `db:"walreporttime" json:"wal_report_time"`
 	Health              int       `db:"health" json:"health"`
