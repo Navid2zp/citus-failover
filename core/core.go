@@ -8,6 +8,11 @@ import (
 
 var ErrDBNotFound = errors.New("no such database found")
 
+const nodeColumns = "formationid,nodeid,groupid,nodename,nodehost,nodeport,sysidentifier," +
+	"goalstate,reportedstate,reportedpgisrunning,reportedrepstate,reporttime,reportedlsn," +
+	"reportedtli,walreporttime,health,healthchecktime,statechangetime,candidatepriority," +
+	"replicationquorum,nodecluster"
+
 // Node represents a node in monitoring service.
 type Node struct {
 	FormationID         string    `db:"formationid" json:"formation_id"`
@@ -23,6 +28,7 @@ type Node struct {
 	ReportedRepState    string    `db:"reportedrepstate" json:"reported_rep_state"`
 	ReportTime          time.Time `db:"reporttime" json:"report_time"`
 	ReportedLSN         string    `db:"reportedlsn" json:"reported_lsn"`
+	ReportedTLI         int       `db:"reportedtli" json:"reported_tli"`
 	WALReportTime       time.Time `db:"walreporttime" json:"wal_report_time"`
 	Health              int       `db:"health" json:"health"`
 	HealthCheckTime     time.Time `db:"healthchecktime" json:"health_check_time"`
@@ -32,6 +38,9 @@ type Node struct {
 	NodeCluster         string    `db:"nodecluster" json:"node_cluster"`
 	IsCoordinator       bool      `db:"-" json:"-"`
 }
+
+const workerColumns = "nodeid,groupid,nodename,nodeport,noderack,hasmetadata,isactive,noderole," +
+	"nodecluster,metadatasynced,shouldhaveshards"
 
 // Worker represents a worker in coordinators.
 type Worker struct {
@@ -48,6 +57,8 @@ type Worker struct {
 	ShouldHaveShards bool     `db:"shouldhaveshards" json:"should_have_shards"`
 }
 
+const coordinatorColumns = "primary_node_id,primary_name,primary_host,primary_port"
+
 // Coordinator represents a coordinator database
 type Coordinator struct {
 	PrimaryNodeID int    `db:"primary_node_id" json:"primary_node_id"`
@@ -59,7 +70,7 @@ type Coordinator struct {
 // GetNodes returns all the node monitored in the monitor.
 func GetNodes() ([]*Node, error) {
 	var nodes []*Node
-	err := monitorDB.Select(&nodes, `select * from pgautofailover.node`)
+	err := monitorDB.Select(&nodes, "select "+nodeColumns+" from pgautofailover.node")
 	return nodes, err
 }
 
@@ -89,8 +100,11 @@ func GetCoordinators(dbname string) ([]*Node, error) {
 	if db = findDatabase(dbname); db == nil {
 		return coordinators, nil
 	}
-	err := monitorDB.Select(&coordinators,
-		`select * from pgautofailover.node where formationid = $1;`, db.formation)
+	err := monitorDB.Select(
+		&coordinators,
+		"select "+nodeColumns+" from pgautofailover.node where formationid = $1;",
+		db.formation,
+	)
 	return coordinators, err
 }
 
@@ -98,7 +112,7 @@ func GetCoordinators(dbname string) ([]*Node, error) {
 func (d *database) getPrimaryWorkers() ([]*Worker, error) {
 	var workers []*Worker
 	err := d.db.Select(&workers,
-		`SELECT * from pg_dist_node where noderole = 'primary';`)
+		"SELECT "+workerColumns+" from pg_dist_node where noderole = 'primary';")
 	return workers, err
 }
 
@@ -106,7 +120,7 @@ func (d *database) getPrimaryWorkers() ([]*Worker, error) {
 func (d *database) getCoordinator() (*Coordinator, error) {
 	var node Coordinator
 	err := monitorDB.Get(&node,
-		`select * from pgautofailover.get_primary($1);`, d.formation)
+		"select "+coordinatorColumns+" from pgautofailover.get_primary($1);", d.formation)
 	return &node, err
 }
 
@@ -118,7 +132,7 @@ func (w *Worker) isPrimary() (bool, *Node, error) {
 	// not including `wait_primary` causes the primary check to fail when there is only one healthy node
 	// https://pg-auto-failover.readthedocs.io/en/master/tutorial.html#cause-a-node-failure
 	// https://github.com/Navid2zp/citus-failover/issues/1
-	err := monitorDB.Get(&newNode, `select * from pgautofailover.node
+	err := monitorDB.Get(&newNode, `select `+nodeColumns+` from pgautofailover.node
 		where formationid = 
 		      (select formationid from pgautofailover.node where nodehost = $1 and nodeport = $2 limit 1)
 		  and (goalstate = 'primary' or goalstate = 'wait_primary')
