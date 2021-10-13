@@ -6,6 +6,10 @@ Monitor:
   Password: 123456
   DBName: pg_auto_failover
 
+  # sslmode for connecting to the monitor service (Defaults to 'disable')
+  # Reference: https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+  SSLMode: disable
+
 # A list of coordinator nodes that you want to be monitored for changes in their worker nodes.
 Coordinators:
   - DBName: postgres
@@ -14,6 +18,10 @@ Coordinators:
 
     # Formation that the node can be found with in monitor.
     Formation: default
+
+    # sslmode for connecting to the coordinator nodes (Defaults to 'disable')
+    # Reference: https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    SSLMode: disable
 
 # Service settings
 Settings:

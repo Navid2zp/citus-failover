@@ -2,11 +2,12 @@ package config
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 // ServiceConfig represents the config data for the application.
@@ -17,12 +18,14 @@ type ServiceConfig struct {
 		User     string
 		Password string
 		DBName   string
+		SSLMode  string `default:"disable"`
 	}
 	Coordinators []struct {
 		Formation string
 		Username  string
 		Password  string
 		DBName    string
+		SSLMode   string `default:"disable"`
 	}
 	Settings struct {
 		CheckInterval int

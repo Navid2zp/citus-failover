@@ -144,19 +144,19 @@ func (d *database) connect(coordinatorNode *Coordinator) error {
 	if d.db == nil {
 		d.host = coordinatorNode.Host
 		d.port = coordinatorNode.Port
-		d.db, err = openDBConnection(d.host, d.username, d.dbname, d.password, d.port)
+		d.db, err = openDBConnection(d.host, d.username, d.dbname, d.password, d.port, d.sslmode)
 		return err
 	}
 	if d.host != coordinatorNode.Host || d.port != coordinatorNode.Port {
 		logger.CoordinatorChanged(coordinatorNode.Host, d.host, d.dbname, coordinatorNode.Port, d.port)
 		d.host = coordinatorNode.Host
 		d.port = coordinatorNode.Port
-		d.db, err = openDBConnection(d.host, d.username, d.dbname, d.password, d.port)
+		d.db, err = openDBConnection(d.host, d.username, d.dbname, d.password, d.port, d.sslmode)
 		return err
 	}
 	if d.db.Ping() != nil {
 		logger.CoordinatorConnectionLost(d.host, d.dbname, d.username, d.port)
-		d.db, err = openDBConnection(d.host, d.username, d.dbname, d.password, d.port)
+		d.db, err = openDBConnection(d.host, d.username, d.dbname, d.password, d.port, d.sslmode)
 		return err
 	}
 	return nil
