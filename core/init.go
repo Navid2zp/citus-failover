@@ -16,7 +16,7 @@ var logger *logging.Logger
 func InitMonitor() {
 	openMonitoringConnection()
 	setupDatabases()
-	logger = logging.NewLogger("core")
+	logger = logging.NewLogger("citus-failover")
 }
 
 // NullInt64 is an alias for sql.NullInt64 data type
