@@ -43,7 +43,7 @@ Create a config file somewhere in your host. Then mount the path as `/config` to
 Map the port for API if enabled.
 
 ```
-docker run -d -v /path/to/folder/for/config/file:/config -p 3002:3002 docker.pkg.github.com/navid2zp/citus-failover/citus-failover:latest
+docker run -d -v /config/folder/path:/config -p 3002:3002 navid2zp/citus-failover:latest
 ```
 
 ## REST API
